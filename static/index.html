@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Inventory & AI Vision Scanner</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <!-- Background Glow Accents -->
+  <div class="ambient-glow glow-1"></div>
+  <div class="ambient-glow glow-2"></div>
+
+  <div class="app-container">
+    <!-- Top Navigation Bar -->
+    <header class="top-nav">
+      <div class="brand">
+        <div class="brand-icon">📦</div>
+        <div>
+          <h1>Smart Inventory</h1>
+          <p class="subtitle">AI Vision & Expiry Intelligence</p>
+        </div>
+      </div>
+      <div class="nav-actions">
+        <div class="status-chip" id="aiStatusChip">
+          <span class="status-dot online"></span>
+          <span>KNN Vision Ready</span>
+        </div>
+        <button class="btn btn-secondary" id="retrainBtn" onclick="retrainModel()">
+          <span class="icon">🔄</span> Retrain Model
+        </button>
+        <button class="btn btn-primary" onclick="openAddModal()">
+          <span class="icon">➕</span> Add Product
+        </button>
+      </div>
+    </header>
+
+    <!-- Stat Metric Cards -->
+    <section class="stats-grid">
+      <div class="stat-card" onclick="filterByStatus('ALL')">
+        <div class="stat-icon icon-blue">📊</div>
+        <div class="stat-content">
+          <span class="stat-label">Total Products</span>
+          <h2 class="stat-value" id="statTotal">0</h2>
+        </div>
+      </div>
+
+      <div class="stat-card" onclick="filterByStatus('SAFE')">
+        <div class="stat-icon icon-green">🛡️</div>
+        <div class="stat-content">
+          <span class="stat-label">Safe Items</span>
+          <h2 class="stat-value text-green" id="statSafe">0</h2>
+        </div>
+      </div>
+
+      <div class="stat-card" onclick="filterByStatus('EXPIRING SOON')">
+        <div class="stat-icon icon-yellow">⚠️</div>
+        <div class="stat-content">
+          <span class="stat-label">Expiring Soon (≤ 7d)</span>
+          <h2 class="stat-value text-yellow" id="statExpiring">0</h2>
+        </div>
+      </div>
+
+      <div class="stat-card" onclick="filterByStatus('EXPIRED')">
+        <div class="stat-icon icon-red">🚨</div>
+        <div class="stat-content">
+          <span class="stat-label">Expired</span>
+          <h2 class="stat-value text-red" id="statExpired">0</h2>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Content Workspace -->
+    <main class="workspace-grid">
+      <!-- Left Column: AI Vision Scanner -->
+      <section class="panel scanner-panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <span class="icon-badge">📷</span>
+            <div>
+              <h3>AI Vision Scanner</h3>
+              <p>Identify product & check expiry via image</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="upload-dropzone" id="dropZone">
+          <input type="file" id="imageInput" accept="image/*" style="display:none;" onchange="handleFileSelect(event)">
+          <div class="dropzone-content" id="dropzonePrompt" onclick="document.getElementById('imageInput').click()">
+            <div class="upload-graphic">📤</div>
+            <p class="dropzone-main-text">Drag & drop product image here</p>
+            <p class="dropzone-sub-text">or <span class="highlight">browse files</span> from your computer</p>
+            <div class="sample-badges">
+              <span class="sample-tag" onclick="loadSample('dataset/horlicks/1786064787800.jpg', event)">Sample: Horlicks</span>
+              <span class="sample-tag" onclick="loadSample('dataset/harpic/harpic-1.jpeg', event)">Sample: Harpic</span>
+              <span class="sample-tag" onclick="loadSample('dataset/kissan/kissan-1.jpeg', event)">Sample: Kissan</span>
+            </div>
+          </div>
+
+          <div class="preview-wrapper" id="previewContainer" style="display: none;">
+            <img id="imagePreview" alt="Scanned Product Preview" class="preview-img">
+            <button class="btn-remove-preview" title="Remove" onclick="clearPreview(event)">✕</button>
+          </div>
+        </div>
+
+        <div class="scanner-actions">
+          <button class="btn btn-primary btn-full" id="scanBtn" onclick="scanSelectedImage()" disabled>
+            <span class="icon">⚡</span> Scan & Analyze Image
+          </button>
+        </div>
+
+        <!-- Scan Result Card -->
+        <div class="scan-result-card" id="scanResult" style="display: none;">
+          <div class="result-header">
+            <div>
+              <span class="badge" id="resStatusBadge">SAFE</span>
+              <h3 id="resProductName" class="result-product-title">Product Name</h3>
+              <span class="result-category" id="resCategory">Category</span>
+            </div>
+            <div class="result-confidence">
+              <span class="conf-label">Confidence</span>
+              <span class="conf-score" id="resConfidence">95%</span>
+            </div>
+          </div>
+
+          <div class="result-details-grid">
+            <div class="detail-box">
+              <span class="detail-label">Current Stock</span>
+              <span class="detail-val" id="resQuantity">0 units</span>
+            </div>
+            <div class="detail-box">
+              <span class="detail-label">Expiry Date</span>
+              <span class="detail-val" id="resExpiryDate">2026-12-31</span>
+            </div>
+            <div class="detail-box">
+              <span class="detail-label">Time Remaining</span>
+              <span class="detail-val" id="resDaysLeft">0 days</span>
+            </div>
+          </div>
+
+          <div class="result-actions" id="resActionButtons">
+            <button class="btn btn-secondary btn-sm" onclick="adjustScannedStock(1)">
+              <span>➕ Add 1 Stock</span>
+            </button>
+            <button class="btn btn-secondary btn-sm" onclick="adjustScannedStock(-1)">
+              <span>➖ Deduct 1 Stock</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Column: Inventory Table -->
+      <section class="panel inventory-panel">
+        <div class="panel-header table-controls">
+          <div class="panel-title">
+            <span class="icon-badge">📋</span>
+            <div>
+              <h3>Inventory List</h3>
+              <p>Real-time products stored in <code class="code-badge">products.csv</code></p>
+            </div>
+          </div>
+          <div class="search-and-filters">
+            <div class="search-input-wrapper">
+              <span class="search-icon">🔍</span>
+              <input type="text" id="searchInput" placeholder="Search product or category..." oninput="handleSearch(event)">
+            </div>
+          </div>
+        </div>
+
+        <!-- Filter Chips -->
+        <div class="filter-pills">
+          <button class="pill-btn active" data-filter="ALL" onclick="filterByStatus('ALL')">All (<span id="pillCountAll">0</span>)</button>
+          <button class="pill-btn text-green" data-filter="SAFE" onclick="filterByStatus('SAFE')">Safe (<span id="pillCountSafe">0</span>)</button>
+          <button class="pill-btn text-yellow" data-filter="EXPIRING SOON" onclick="filterByStatus('EXPIRING SOON')">Expiring Soon (<span id="pillCountExpiring">0</span>)</button>
+          <button class="pill-btn text-red" data-filter="EXPIRED" onclick="filterByStatus('EXPIRED')">Expired (<span id="pillCountExpired">0</span>)</button>
+        </div>
+
+        <!-- Table Container -->
+        <div class="table-responsive">
+          <table class="inventory-table" id="inventoryTable">
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Category</th>
+                <th>Quantity</th>
+                <th>Expiry Date</th>
+                <th>Days Left</th>
+                <th>Status</th>
+                <th style="text-align: right;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="inventoryTableBody">
+              <tr>
+                <td colspan="7" class="empty-state">Loading inventory...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Add / Edit Product Modal -->
+  <div class="modal-backdrop" id="productModal" style="display: none;">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modalTitle">Add New Product</h3>
+        <button class="btn-close" onclick="closeModal()">✕</button>
+      </div>
+      <form id="productForm" onsubmit="saveProduct(event)">
+        <div class="form-group">
+          <label for="formProductName">Product Name</label>
+          <input type="text" id="formProductName" required placeholder="e.g. Horlicks or Kissan">
+        </div>
+        <div class="form-group">
+          <label for="formCategory">Category</label>
+          <input type="text" id="formCategory" required placeholder="e.g. Health Drink, Food, Cleaning">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="formExpiryDate">Expiry Date</label>
+            <input type="date" id="formExpiryDate" required>
+          </div>
+          <div class="form-group">
+            <label for="formQuantity">Quantity</label>
+            <input type="number" id="formQuantity" min="0" value="1" required>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="saveProductBtn">Save Product</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
