@@ -112,8 +112,8 @@ export default function App() {
       {/* Footer */}
       <footer className="w-full border-t border-slate-900 py-6 text-center text-xs text-slate-500">
         <div className="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-          <span>Smart Pantry Expiry Tracker • FastAPI & React</span>
-          <span className="font-mono text-[11px] text-slate-600">Vision KNN/CNN Pipeline • SQLite</span>
+          <span>Smart Inventory Management • AI Vision & Expiry Intelligence</span>
+          <span className="font-mono text-[11px] text-slate-600">FastAPI • React • SQLite • KNN</span>
         </div>
       </footer>
 

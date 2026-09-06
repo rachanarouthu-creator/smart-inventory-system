@@ -39,9 +39,9 @@ export default function Navbar({ activeTab, setActiveTab, stats }) {
           </div>
           <div>
             <div className="font-bold text-base tracking-tight text-white flex items-center gap-1.5">
-              Smart Pantry <span className="text-emerald-400 font-mono text-xs px-1.5 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20">AI</span>
+              Smart Inventory <span className="text-emerald-400 font-mono text-xs px-1.5 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20">AI</span>
             </div>
-            <div className="text-[11px] text-slate-400 hidden sm:block">Vision & Expiry Tracker</div>
+            <div className="text-[11px] text-slate-400 hidden sm:block">AI Vision & Expiry Intelligence</div>
           </div>
         </div>
 

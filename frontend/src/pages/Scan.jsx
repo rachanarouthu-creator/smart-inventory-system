@@ -116,10 +116,10 @@ export default function Scan({ onNavigateToAdd, onNavigateToDashboard, addNotifi
       {/* Header */}
       <div className="text-center space-y-2">
         <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
-          Pantry Vision <span className="bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-teal-300">Scanner</span>
+          Smart Inventory <span className="bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-teal-300">Vision Scanner</span>
         </h1>
         <p className="text-sm text-slate-400 max-w-lg mx-auto">
-          Snap or upload a photo of any kitchen pantry item. The AI vision model classifies the product and checks its expiry status in your inventory.
+          Snap or upload a photo of any inventory item. The AI vision model classifies the product and checks its expiry status in your inventory.
         </p>
       </div>
 

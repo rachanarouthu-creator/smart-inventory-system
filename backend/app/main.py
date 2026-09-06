@@ -6,7 +6,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, File, UploadFile, HTTPException, Depends, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 from sqlalchemy.orm import Session
 
 from app.database import get_db, seed_database_if_empty
@@ -35,8 +35,8 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="Smart Pantry Expiry Tracker API",
-    description="Vision AI and Inventory Expiry Tracking for Kitchen Products",
+    title="Smart Inventory Management API",
+    description="Vision AI and Inventory Expiry Tracking for Products",
     version="1.0.0",
     lifespan=lifespan,
 )
@@ -313,6 +313,21 @@ if frontend_dist:
     assets_dir = os.path.join(frontend_dist, "assets")
     if os.path.exists(assets_dir):
         app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
+
+    @app.get("/sw.js", include_in_schema=False)
+    def unregister_service_worker():
+        """Cleans up and unregisters any stale service worker cached by the browser from previous projects."""
+        script = """
+        self.addEventListener('install', () => self.skipWaiting());
+        self.addEventListener('activate', () => {
+            self.registration.unregister().then(() => {
+                self.clients.matchAll().then(clients => {
+                    clients.forEach(client => client.navigate(client.url));
+                });
+            });
+        });
+        """
+        return Response(content=script, media_type="application/javascript")
 
     @app.get("/{full_path:path}", include_in_schema=False)
     async def serve_frontend(full_path: str):
