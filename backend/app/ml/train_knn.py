@@ -56,16 +56,24 @@ def train_knn():
     model = KNeighborsClassifier(n_neighbors=1)
     model.fit(X, y)
 
-    # Save model.pkl in backend and current working directory
+    # Save model.pkl in backend and root working directory
+    backend_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    root_dir = os.path.dirname(backend_dir)
     target_paths = [
         "model.pkl",
-        os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "model.pkl"),
+        "backend/model.pkl",
+        os.path.join(backend_dir, "model.pkl"),
+        os.path.join(root_dir, "model.pkl"),
     ]
+    saved_paths = set()
     for target in target_paths:
+        if target in saved_paths:
+            continue
         try:
             with open(target, "wb") as f:
                 pickle.dump(model, f)
             print(f"[Train KNN] Model saved to {target}")
+            saved_paths.add(target)
         except Exception as e:
             print(f"[Train KNN] Could not save to {target}: {e}")
 

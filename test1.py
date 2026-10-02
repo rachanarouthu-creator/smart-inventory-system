@@ -8,7 +8,7 @@ with open("model.pkl", "rb") as file:
     model = pickle.load(file)
 
 # Test image
-img = cv2.imread("dataset/bread/horlicks/1786064787800.jpg")
+img = cv2.imread("dataset/horlicks/1786064787800.jpg")
 
 img = cv2.resize(img, (100, 100))
 img = img.flatten()
@@ -23,8 +23,8 @@ print("Predicted Product:", product_name)
 # Read inventory data
 df = pd.read_csv("products.csv")
 
-# Find predicted product
-product = df[df["Product"] == product_name]
+# Find predicted product (case-insensitive)
+product = df[df["Product"].str.strip().str.lower() == product_name.strip().lower()]
 
 if not product.empty:
 

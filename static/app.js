@@ -353,18 +353,40 @@ function displayScanResult(data) {
   }
 
   badge.className = 'badge';
+  const alertBanner = document.getElementById('resAlertBanner');
+
   if (data.status === 'SAFE') {
     badge.classList.add('badge-safe');
     badge.innerText = 'SAFE';
+    if (alertBanner) {
+      alertBanner.style.display = 'flex';
+      alertBanner.className = 'expiry-alert-banner alert-safe';
+      alertBanner.innerHTML = `<span>✅ <strong>Safe Condition:</strong> Product is fresh with ${data.days_left} days remaining until expiry (${data.expiry_date}).</span>`;
+    }
   } else if (data.status === 'EXPIRING SOON') {
     badge.classList.add('badge-warning');
     badge.innerText = 'EXPIRING SOON';
+    if (alertBanner) {
+      alertBanner.style.display = 'flex';
+      alertBanner.className = 'expiry-alert-banner alert-expiring';
+      alertBanner.innerHTML = `<span>⚠️ <strong>Expiring Soon Alert:</strong> Only ${data.days_left} day(s) left until expiration (${data.expiry_date})! Recommended for immediate use.</span>`;
+    }
   } else if (data.status === 'EXPIRED') {
     badge.classList.add('badge-danger');
     badge.innerText = 'EXPIRED';
+    if (alertBanner) {
+      alertBanner.style.display = 'flex';
+      alertBanner.className = 'expiry-alert-banner alert-expired';
+      alertBanner.innerHTML = `<span>🚨 <strong>CRITICAL EXPIRY ALERT:</strong> This product has EXPIRED (${Math.abs(data.days_left)} days overdue since ${data.expiry_date}). Do not consume or sell!</span>`;
+    }
   } else {
     badge.classList.add('badge-warning');
     badge.innerText = 'NOT IN INVENTORY';
+    if (alertBanner) {
+      alertBanner.style.display = 'flex';
+      alertBanner.className = 'expiry-alert-banner alert-expiring';
+      alertBanner.innerHTML = `<span>ℹ️ <strong>Item Detected:</strong> '${data.detected_label}' was identified by AI but is not yet in products.csv inventory. Click below to add it.</span>`;
+    }
   }
 
   if (data.in_inventory) {

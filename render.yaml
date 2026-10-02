@@ -1,18 +1,15 @@
 services:
   - type: web
-    name: pantry-tracker-api
+    name: smart-inventory-ai
     runtime: docker
-    rootDir: backend
-    dockerfilePath: Dockerfile
+    dockerfilePath: ./Dockerfile
     plan: free
     region: oregon
-    healthCheckPath: /api/health
-    disk:
-      name: pantry-data
-      mountPath: /data
-      sizeGB: 1
+    healthCheckPath: /health
     envVars:
       - key: DATABASE_URL
-        value: sqlite:////data/pantry.db
+        value: sqlite:///./pantry.db
       - key: CORS_ORIGINS
         value: "*"
+      - key: UPLOAD_DIR
+        value: ./uploads

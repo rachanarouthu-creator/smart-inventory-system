@@ -1,40 +1,40 @@
-# 🥫 Smart Pantry Expiry Tracker
+# 🥫 Smart Inventory AI
 
-> An AI-powered kitchen pantry assistant that classifies grocery product photos using computer vision and tracks inventory expiration dates in real time.
+> An intelligent enterprise and pantry inventory management system powered by Computer Vision, OCR expiry verification, FEFO batch rotation, and automated audit logging.
 
 [![FastAPI](https://img.shields.io/badge/Backend-FastAPI-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
 [![React](https://img.shields.io/badge/Frontend-React_19_+_Vite-61DAFB?logo=react&logoColor=black)](https://react.dev)
 [![Tailwind CSS](https://img.shields.io/badge/Styling-Tailwind_CSS-38B2AC?logo=tailwind-css&logoColor=white)](https://tailwindcss.com)
-[![Render](https://img.shields.io/badge/Deploy-Render-46E3B7?logo=render&logoColor=black)](https://render.com)
-[![Vercel](https://img.shields.io/badge/Deploy-Vercel-000000?logo=vercel&logoColor=white)](https://vercel.com)
+[![SQLite](https://img.shields.io/badge/Database-SQLite_+_SQLAlchemy-003B57?logo=sqlite&logoColor=white)](https://sqlite.org)
 
 ---
 
-## 🌐 Live Deployed Application
+## 🌟 Star Features
 
-- **Frontend App**: [https://smart-pantry-tracker.vercel.app](https://smart-pantry-tracker.vercel.app) *(Replace with your live Vercel URL)*
-- **Backend API**: [https://pantry-tracker-backend.onrender.com](https://pantry-tracker-backend.onrender.com) *(Replace with your live Render URL)*
-- **API Documentation**: [https://pantry-tracker-backend.onrender.com/docs](https://pantry-tracker-backend.onrender.com/docs)
-
----
-
-## 🌟 Key Features
-
-1. **AI Vision Camera Scanner (`/scan`)**:
-   - Upload or capture pantry product photos directly from a smartphone or laptop camera.
-   - Dual-model inference pipeline: runs K-Nearest Neighbors (`model.pkl`) or MobileNetV2 CNN (`model_cnn.pt`).
-   - Returns predicted product name, confidence rating, matched inventory record, and live expiry countdown.
-2. **Dynamic Inventory Expiry Tracking**:
-   - Color-coded badges:
-     - 🟢 **SAFE**: More than 7 days remaining.
-     - 🟡 **EXPIRING SOON**: 7 or fewer days remaining.
-     - 🔴 **EXPIRED**: Expiry date has passed.
-   - Inline editing for stock quantities and expiry dates.
-   - Instant search and category filtering.
-3. **Database Persistence**:
-   - Migrated from raw CSV to SQLite via **SQLAlchemy**, seeded automatically on startup from `products_seed.csv`.
-4. **Kitchen-First Mobile Design**:
-   - Responsive dark-mode interface built with Tailwind CSS, Lucide icons, and responsive tables/cards.
+1. **AI Product Scanner (`/scan`)**:
+   - Live camera stream capture or photo upload directly in the browser.
+   - Dual-model vision pipeline: KNN classifier (`model.pkl`) and MobileNetV2 CNN (`model_cnn.pt`).
+   - OCR packaging date reader with matching confidence indicator.
+   - FEFO (First-Expiry, First-Out) recommendation highlighting earliest expiring batch.
+   - Low-stock warning banner with one-click restock recommendation (`+recommended_restock`).
+   - Inline new batch intake directly from the scanning workflow.
+2. **Batches & FEFO Shelf-Life Rotation**:
+   - Track multiple production lots (`batch_number`, `quantity`, `expiry_date`) per inventory item.
+   - FEFO algorithm prioritizes earliest-expiring active batches to minimize spoilage.
+   - Visual batch status badges (Safe, Expiring Soon, Expired).
+3. **Stock Movement Audit Trail (`/history`)**:
+   - Complete audit trail logging every stock intake, batch addition, and manual adjustment.
+   - Tracks previous quantity, delta change, new balance, timestamps, and reason.
+4. **Real-time Notification Center**:
+   - Bell icon with unread badge count in the top navigation bar.
+   - Automated sync for critical stock conditions (`EXPIRED`, `EXPIRING_SOON`, `LOW_STOCK`, `SCAN`).
+   - "Mark all as read" capability and direct jump to relevant inventory screens.
+5. **Inventory Analytics & Health Scorecard (`/analytics`)**:
+   - Comprehensive Health Score (0-100) with rating ("Good", "Moderate", "Critical").
+   - Dimension scores: Stock Health, Expiry Safety, and Product Availability.
+   - Rule-based AI inventory insights grounded in real database records.
+6. **Data Export & Reporting (`/reports/export`)**:
+   - One-click CSV and JSON export of inventory records directly from the Dashboard.
 
 ---
 
@@ -44,36 +44,37 @@
 PandasPractice/
 ├── backend/
 │   ├── app/
-│   │   ├── main.py              # FastAPI endpoints & CORS
-│   │   ├── database.py          # SQLAlchemy session, engine, & auto-seeding
-│   │   ├── models.py            # SQLite Product table schema
-│   │   ├── schemas.py           # Pydantic models for validation
+│   │   ├── main.py              # FastAPI endpoints, CORS & SPA serving
+│   │   ├── database.py          # SQLAlchemy session, engine & auto-migration
+│   │   ├── models.py            # SQLite Product, Batch, StockMovement, Notification schemas
+│   │   ├── schemas.py           # Pydantic models for request/response validation
 │   │   └── ml/
 │   │       ├── predict.py       # Dual-model inference & fuzzy label matcher
-│   │       ├── train_knn.py     # KNN training pipeline
+│   │       ├── ocr.py           # Expiry date extraction & verification
+│   │       ├── train_knn.py     # KNN classifier training pipeline
 │   │       └── train_cnn.py     # MobileNetV2 transfer learning script
 │   ├── dataset/                 # Product training photos (Horlicks, Harpic, etc.)
+│   ├── test_api.py              # 14-step automated test suite
 │   ├── model.pkl                # Trained KNN classifier
-│   ├── products_seed.csv        # Seed inventory CSV
-│   ├── requirements.txt         # Python dependencies
-│   └── Dockerfile               # Container build definition
+│   └── requirements.txt         # Python dependencies
 ├── frontend/
 │   ├── src/
 │   │   ├── components/
-│   │   │   ├── Navbar.jsx       # Tab navigation & urgency indicators
-│   │   │   ├── StatusBadge.jsx  # Color-coded expiry badges
-│   │   │   └── Toast.jsx        # Notification alert banners
+│   │   │   ├── Navbar.jsx             # Top bar with 6 tabs & NotificationCenter
+│   │   │   ├── NotificationCenter.jsx # System alert popover & unread badges
+│   │   │   ├── StatusBadge.jsx        # Color-coded expiry & stock status badges
+│   │   │   └── Toast.jsx              # Floating notification banners
 │   │   ├── pages/
-│   │   │   ├── Scan.jsx         # Live scanner & expiry result card
-│   │   │   ├── Dashboard.jsx    # Inventory table, sorting & inline edits
+│   │   │   ├── Scan.jsx         # AI Product Scanner (Star Feature)
+│   │   │   ├── Dashboard.jsx    # Inventory table, batch drawers & CSV/JSON export
+│   │   │   ├── Alerts.jsx       # Actionable expired & low-stock monitoring
+│   │   │   ├── Analytics.jsx    # Health Scorecard & AI rule-based insights
+│   │   │   ├── ScanHistory.jsx  # Stock movement audit trail & vision logs
 │   │   │   └── AddProduct.jsx   # Manual product creation form
 │   │   ├── api.js               # Centralized API service
 │   │   └── App.jsx              # Main view router
 │   ├── package.json
 │   └── vite.config.js
-├── docker-compose.yml           # Multi-container local orchestration
-├── render.yaml                  # 1-click Render blueprint
-├── DEPLOY.md                    # Free cloud deployment guide
 └── README.md
 ```
 

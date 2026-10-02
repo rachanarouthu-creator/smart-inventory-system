@@ -190,6 +190,119 @@ def delete_product(product_name: str):
     return {"message": f"Product '{product_name}' deleted successfully"}
 
 
+class StockAddRequest(BaseModel):
+    product: str
+    add_quantity: int
+    expiry_date: Optional[str] = None
+
+
+@app.post("/api/stock/add")
+def add_stock(payload: StockAddRequest):
+    """Quick stock intake: add units to an existing product with optional expiry update."""
+    df = read_inventory_df()
+    norm_name = payload.product.strip().lower()
+
+    idx = df[df["Product"].str.strip().str.lower() == norm_name].index
+    if len(idx) == 0:
+        raise HTTPException(status_code=404, detail=f"Product '{payload.product}' not found in inventory.")
+
+    row_idx = idx[0]
+    curr_qty = int(df.at[row_idx, "Quantity"]) if pd.notna(df.at[row_idx, "Quantity"]) else 0
+    new_qty = max(0, curr_qty + int(payload.add_quantity))
+    df.at[row_idx, "Quantity"] = new_qty
+
+    if payload.expiry_date and payload.expiry_date.strip():
+        df.at[row_idx, "ExpiryDate"] = payload.expiry_date.strip()
+
+    save_inventory_df(df)
+    return {
+        "message": f"Added {payload.add_quantity} units to '{payload.product}'",
+        "product": str(df.at[row_idx, "Product"]),
+        "new_quantity": new_qty,
+        "expiry_date": str(df.at[row_idx, "ExpiryDate"]),
+    }
+
+
+@app.get("/api/analytics")
+def get_analytics():
+    """Returns analytics breakdown: category distribution, expiry health, low stock alerts, health score."""
+    df = read_inventory_df()
+    total_products = len(df)
+    total_units = int(df["Quantity"].sum()) if not df.empty and "Quantity" in df else 0
+
+    categories = {}
+    low_stock = []
+    expiring_soon_items = []
+    expired_items = []
+    safe_count = 0
+    expiring_count = 0
+    expired_count = 0
+
+    for _, row in df.iterrows():
+        name = str(row["Product"]).strip()
+        cat = str(row["Category"]).strip()
+        qty = int(row["Quantity"]) if pd.notna(row["Quantity"]) else 0
+        exp = str(row["ExpiryDate"]).strip()
+
+        # Category aggregation
+        if cat not in categories:
+            categories[cat] = {"count": 0, "units": 0}
+        categories[cat]["count"] += 1
+        categories[cat]["units"] += qty
+
+        # Expiry status
+        calc = calculate_status(exp)
+        st = calc["status"]
+        if st == "SAFE":
+            safe_count += 1
+        elif st == "EXPIRING SOON":
+            expiring_count += 1
+            expiring_soon_items.append({"product": name, "days_left": calc["days_left"], "expiry_date": exp})
+        elif st == "EXPIRED":
+            expired_count += 1
+            expired_items.append({"product": name, "days_left": calc["days_left"], "expiry_date": exp})
+
+        # Low stock threshold
+        if qty <= 4:
+            low_stock.append({"product": name, "category": cat, "quantity": qty})
+
+    # Health score (0-100)
+    if total_products > 0:
+        safe_ratio = safe_count / total_products
+        out_of_stock_penalty = sum(1 for _, r in df.iterrows() if r["Quantity"] == 0) * 15
+        health_score = max(0, min(100, int((safe_ratio * 80) + (min(total_units, 50) / 50 * 20) - out_of_stock_penalty)))
+    else:
+        health_score = 100
+
+    return {
+        "total_products": total_products,
+        "total_units": total_units,
+        "health_score": health_score,
+        "status_distribution": {
+            "safe": safe_count,
+            "expiring_soon": expiring_count,
+            "expired": expired_count,
+        },
+        "category_distribution": categories,
+        "low_stock_items": low_stock,
+        "expiring_soon_items": expiring_soon_items,
+        "expired_items": expired_items,
+    }
+
+
+@app.get("/api/export")
+def export_inventory_csv():
+    """Exports current inventory as a downloadable CSV file."""
+    df = read_inventory_df()
+    csv_data = df.to_csv(index=False)
+    from fastapi.responses import Response
+    return Response(
+        content=csv_data,
+        media_type="text/csv",
+        headers={"Content-Disposition": "attachment; filename=inventory.csv"}
+    )
+
+
 @app.post("/api/scan")
 async def scan_product(file: UploadFile = File(...)):
     """Predicts product class from uploaded image and matches with inventory."""

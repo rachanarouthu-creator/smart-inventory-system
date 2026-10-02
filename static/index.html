@@ -94,9 +94,12 @@
             <p class="dropzone-main-text">Drag & drop product image here</p>
             <p class="dropzone-sub-text">or <span class="highlight">browse files</span> from your computer</p>
             <div class="sample-badges">
-              <span class="sample-tag" onclick="loadSample('dataset/horlicks/1786064787800.jpg', event)">Sample: Horlicks</span>
-              <span class="sample-tag" onclick="loadSample('dataset/harpic/harpic-1.jpeg', event)">Sample: Harpic</span>
-              <span class="sample-tag" onclick="loadSample('dataset/kissan/kissan-1.jpeg', event)">Sample: Kissan</span>
+              <span class="sample-tag" onclick="loadSample('dataset/horlicks/1786064787800.jpg', event)">🔴 Horlicks (Expired)</span>
+              <span class="sample-tag" onclick="loadSample('dataset/harpic/harpic-1.jpeg', event)">🔴 Harpic (Expired)</span>
+              <span class="sample-tag" onclick="loadSample('dataset/coriander_powder/coriander powder1.jpeg', event)">🟡 Coriander (Expiring Soon)</span>
+              <span class="sample-tag" onclick="loadSample('dataset/kissan/kissan-1.jpeg', event)">🟢 Kissan (Safe)</span>
+              <span class="sample-tag" onclick="loadSample('dataset/oil/oil-1.jpeg', event)">🟢 Oil (Safe)</span>
+              <span class="sample-tag" onclick="loadSample('dataset/soya_sos/soya sos-1.jpeg', event)">🟢 Soya Sauce (Safe)</span>
             </div>
           </div>
 
@@ -125,6 +128,9 @@
               <span class="conf-score" id="resConfidence">95%</span>
             </div>
           </div>
+
+          <!-- Alert Banner for Expired / Expiring Soon -->
+          <div id="resAlertBanner" class="expiry-alert-banner" style="display: none;"></div>
 
           <div class="result-details-grid">
             <div class="detail-box">

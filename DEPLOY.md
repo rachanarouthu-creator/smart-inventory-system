@@ -1,66 +1,86 @@
-# 🚀 1-Click Deployment Guide: Single URL Web App
+# 🚀 Smart Inventory AI - Complete Deployment Guide
 
-The entire application (React Frontend + FastAPI Backend + SQLite + AI Vision Model) is **packaged as a single unified service**. You only deploy **one service** on **Render** (or Railway) and get **ONE single website URL**.
-
----
-
-## 🌐 How It Works
-
-```
- ┌─────────────────────────────────────────────────────────────┐
- │                SINGLE UNIFIED WEBSITE URL                   │
- │           https://your-pantry-app.onrender.com              │
- ├──────────────────────────────┬──────────────────────────────┤
- │  🎨 React Frontend UI        │  ⚡ FastAPI Backend & ML     │
- │  • / (Home / AI Scanner)     │  • /scan (Photo Expiry AI)   │
- │  • /dashboard (Inventory)    │  • /predict (Model Classes)  │
- │  • /add (Add Product)        │  • /inventory (CRUD & DB)    │
- │                              │  • /docs (Swagger API Docs)  │
- └──────────────────────────────┴──────────────────────────────┘
-```
+This project can be deployed in two convenient ways:
+- **Option 1 (Recommended): Single-URL Unified Service on Render / Railway / Docker**
+  One single URL (`https://your-app.onrender.com`) serves both the React UI and the FastAPI AI Backend. Zero CORS configuration needed.
+- **Option 2: Vercel (Frontend) + Render (Backend)**
+  Deploy the React UI to Vercel and the Python API to Render, connected via environment variable or the in-app Server Settings.
 
 ---
 
-## 3 Simple Steps to Deploy
+## 🌟 Option 1: Single-URL Unified Deployment (Render - Free)
 
-### Step 1: Push to GitHub
-If you haven't pushed your code to GitHub yet:
+FastAPI automatically serves the React UI and the AI Computer Vision API from a single Docker container.
+
+### Step 1: Commit and Push to GitHub
 ```bash
 git add .
-git commit -m "Deploy single-URL Smart Pantry app"
+git commit -m "Deploy Smart Inventory AI"
 git branch -M main
-git remote add origin https://github.com/YOUR_USERNAME/smart-pantry-tracker.git
+git remote add origin https://github.com/YOUR_USERNAME/smart-inventory-ai.git
 git push -u origin main
 ```
 
----
-
-### Step 2: Deploy on Render (Free)
-
-1. Go to [Render Dashboard](https://dashboard.render.com/) and click **New +** > **Web Service**.
+### Step 2: Create Web Service on Render
+1. Open [Render Dashboard](https://dashboard.render.com/) and click **New +** → **Web Service**.
 2. Connect your GitHub repository.
-3. Fill in these settings:
-   - **Name**: `smart-pantry-app` (or any name you want)
-   - **Region**: Nearest to you
-   - **Root Directory**: `backend`
+3. Configure the settings:
+   - **Name**: `smart-inventory-ai` (or any custom name)
+   - **Region**: Oregon (or nearest to you)
+   - **Root Directory**: *(Leave empty / root)*
    - **Runtime**: `Docker`
+   - **Dockerfile Path**: `./Dockerfile`
    - **Instance Type**: `Free`
 4. Environment Variables:
    - `DATABASE_URL` = `sqlite:///./pantry.db`
+   - `CORS_ORIGINS` = `*`
+   - `UPLOAD_DIR` = `./uploads`
 5. Click **Create Web Service**.
 
-Render will automatically build the container and deploy it in 2–3 minutes.
+### Step 3: Access Your Live Application
+Render will provision your URL in ~2–3 minutes:
+```
+https://smart-inventory-ai.onrender.com
+```
+- Open the URL on desktop or mobile camera to use the full AI scanner, expiry tracker, and inventory dashboard.
+- Swagger API documentation is available at `/docs`.
 
 ---
 
-### Step 3: Open Your Live Website URL!
+## ⚡ Option 2: Deploy Frontend on Vercel + Backend on Render
 
-Render will give you **one single URL** at the top of your dashboard:
-```
-https://smart-pantry-app.onrender.com
+If you prefer hosting the frontend on Vercel:
+
+### Step 1: Deploy Backend on Render
+Deploy using Option 1 above to get your backend URL, for example:
+`https://smart-inventory-ai.onrender.com`
+
+### Step 2: Deploy Frontend on Vercel
+1. Go to [Vercel Dashboard](https://vercel.com/new).
+2. Import your GitHub repository.
+3. Set **Root Directory** to `frontend`.
+4. Under **Environment Variables**, add:
+   - `VITE_API_URL` = `https://smart-inventory-ai.onrender.com`
+5. Click **Deploy**.
+
+*(Tip: You can also change or test the backend URL directly inside the app by clicking the Server icon at the top right of the navigation bar).*
+
+---
+
+## 💻 Local Development
+
+### 1. Start FastAPI Backend (Port 8000)
+```bash
+# Windows PowerShell
+.\venv\Scripts\Activate.ps1
+uvicorn app.main:app --reload --port 8000
 ```
 
-- Visit that URL in your browser or phone camera: the complete website loads immediately!
-- Test the camera scan or inventory dashboard directly on that live link.
-- If you ever want to check the interactive Swagger API documentation, visit:
-  `https://smart-pantry-app.onrender.com/docs`
+### 2. Start React Frontend (Port 5173)
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Open `http://localhost:5173` in your browser.

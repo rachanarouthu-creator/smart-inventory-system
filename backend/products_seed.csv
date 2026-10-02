@@ -1,6 +1,12 @@
-Product,Category,ExpiryDate,Quantity
-Horlicks,Health Drink,2026-07-02,5
-Harpic,Cleaning,2026-04-30,3
-Kissan,Food,2026-11-30,8
-Soya Sauce,Food,2027-01-31,4
-Medicine,Medicine,2028-02-29,2
+Product,Category,ExpiryDate,Quantity,MinimumStock,Price,ImagePath
+Horlicks,Health Drink,2026-07-02,24,5,150.0,/uploads/horlicks.jpg
+Harpic,Cleaning,2026-04-30,3,5,85.0,/uploads/harpic.jpg
+Kissan,Food,2026-11-30,8,10,120.0,/uploads/kissan.jpg
+Soya Sauce,Food,2027-01-31,4,5,60.0,/uploads/soya_sauce.jpg
+Coriander Powder,Spice,2026-10-08,12,5,45.0,/uploads/coriander_powder.jpg
+Oil,Cooking Oil,2027-06-15,6,5,140.0,/uploads/oil.jpg
+Maggi Noodles,Food,2026-12-15,15,5,14.0,/uploads/maggie.jpg
+Red Label Tea,Beverage,2027-03-20,10,4,130.0,/uploads/tea_powder.jpg
+Colgate Toothpaste,Personal Care,2027-08-30,8,3,65.0,/uploads/toothpaste.jpg
+Parle-G Biscuits,Snack,2026-11-10,20,6,25.0,/uploads/biscuits.jpg
+Tata Salt,Pantry,2028-05-01,12,5,28.0,/uploads/salt.jpg
